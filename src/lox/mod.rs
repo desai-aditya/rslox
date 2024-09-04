@@ -1,5 +1,5 @@
 use std::io::{self, stdin, Write};
-use std::{env::args, fs::read_to_string, process::exit};
+use std::{fs::read_to_string, process::exit};
 
 use scanlex::{Scanner, Token};
 

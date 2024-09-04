@@ -2,15 +2,16 @@ pub mod token_type;
 
 use token_type::TokenType;
 
+#[derive(Clone, Debug)]
 pub struct Token {
     typ: TokenType,
     lexeme: String,
     literal: char,
-    line: u32,
+    line: usize,
 }
 
 impl Token {
-    pub fn new(typ: token_type::TokenType, lexeme: String, literal: char, line: u32) -> Self {
+    pub fn new(typ: token_type::TokenType, lexeme: String, literal: char, line: usize) -> Self {
         Self {
             typ,
             lexeme,

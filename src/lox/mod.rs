@@ -1,7 +1,12 @@
+pub mod scanner;
+pub mod token;
+
 use std::io::{self, stdin, Write};
 use std::{fs::read_to_string, process::exit};
 
-use scanlex::{Scanner, Token};
+//use scanlex::{Scanner, Token};
+use crate::lox::scanner::Scanner;
+use crate::lox::token::Token;
 
 #[derive(Debug)]
 pub struct Lox {
@@ -23,13 +28,8 @@ impl Lox {
     }
 
     pub fn run(&self, source: String) -> io::Result<()> {
-        let mut scan = Scanner::new(&source);
-        loop {
-            match scan.get() {
-                Token::End => break,
-                token => println!("{:?}", token),
-            }
-        }
+        let mut scan = Scanner::new(source);
+        println!("{:?}", scan.scan_tokens());
         Ok(())
     }
 

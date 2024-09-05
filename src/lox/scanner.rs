@@ -68,10 +68,29 @@ impl Scanner {
                 true => self.add_token_type(TokenType::EQUAL_EQUAL),
                 false => self.add_token_type(TokenType::EQUAL),
             },
-            '\n' => println!("Got a newline"),
+            '/' => match self.match_next_char('/') {
+                true => {
+                    while self.peek() != '\n' && !self.is_at_end() {
+                        self.advance();
+                    }
+                }
+                false => self.add_token_type(TokenType::SLASH),
+            },
+            '\r' | ' ' | '\t' => (),
+            '\n' => self.line += 1,
             c => return Err((self.line, format!("Character {c} is not recognized"))),
         }
         Ok(())
+    }
+
+    pub fn peek(&mut self) -> char {
+        if self.is_at_end() {
+            return '\0';
+        }
+        self.source
+            .chars()
+            .nth(self.current)
+            .expect("A character must be present at this index")
     }
 
     pub fn match_next_char(&mut self, c: char) -> bool {

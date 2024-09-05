@@ -1,7 +1,8 @@
 use crate::lox::token::Token;
 use std::vec::Vec;
 
-use super::token::token_type::TokenType;
+use super::{token::token_type::TokenType, Lox};
+use std::result::Result;
 
 pub struct Scanner {
     source: String,
@@ -22,14 +23,14 @@ impl Scanner {
         }
     }
 
-    pub fn scan_tokens(&mut self) -> Vec<Token> {
+    pub fn scan_tokens(&mut self) -> Result<Vec<Token>, (usize, String)> {
         while !self.is_at_end() {
             self.start = self.current;
-            self.scan_token();
+            self.scan_token()?;
         }
         self.tokens
             .push(Token::new(TokenType::EOF, "".to_string(), '\0', self.line));
-        self.tokens.clone()
+        Ok(self.tokens.clone())
     }
 
     pub fn advance(&mut self) -> char {
@@ -38,7 +39,7 @@ impl Scanner {
         c.expect("Character must be present at this index")
     }
 
-    pub fn scan_token(&mut self) {
+    pub fn scan_token(&mut self) -> Result<(), (usize, String)> {
         let c = self.advance();
         match c {
             '(' => self.add_token_type(TokenType::LEFT_PAREN),
@@ -52,8 +53,9 @@ impl Scanner {
             '-' => self.add_token_type(TokenType::MINUS),
             ';' => self.add_token_type(TokenType::SEMICOLON),
             '\n' => println!("Got a newline"),
-            c => panic!("This character {} can still not be parsed", c),
+            c => return Err((self.line, String::from("Character is not recognized"))),
         }
+        Ok(())
     }
 
     pub fn add_token_type(&mut self, typ: TokenType) {

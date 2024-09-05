@@ -18,22 +18,25 @@ impl Lox {
         Self { had_error: false }
     }
 
-    pub fn error(&mut self, line: u32, message: String) {
+    pub fn error(&mut self, line: usize, message: String) {
         self.report(line, "".to_string(), message);
     }
 
-    pub fn report(&mut self, line: u32, location: String, message: String) {
+    pub fn report(&mut self, line: usize, location: String, message: String) {
         eprintln!("[line {}]: Error {}: {}", line, location, message);
         self.had_error = true;
     }
 
-    pub fn run(&self, source: String) -> io::Result<()> {
+    pub fn run(&mut self, source: String) -> io::Result<()> {
         let mut scan = Scanner::new(source);
-        println!("{:?}", scan.scan_tokens());
+        match scan.scan_tokens() {
+            Ok(token_vec) => println!("{:?}", token_vec),
+            Err((line, e)) => self.error(line, e),
+        }
         Ok(())
     }
 
-    pub fn run_file(self, filename: String) -> io::Result<()> {
+    pub fn run_file(mut self, filename: String) -> io::Result<()> {
         let file_string = read_to_string(filename)?;
         self.run(file_string)?;
         if self.had_error {

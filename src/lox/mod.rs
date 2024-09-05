@@ -4,9 +4,7 @@ pub mod token;
 use std::io::{self, stdin, Write};
 use std::{fs::read_to_string, process::exit};
 
-//use scanlex::{Scanner, Token};
 use crate::lox::scanner::Scanner;
-use crate::lox::token::Token;
 
 #[derive(Debug)]
 pub struct Lox {

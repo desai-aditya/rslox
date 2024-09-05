@@ -1,7 +1,7 @@
 use crate::lox::token::Token;
 use std::vec::Vec;
 
-use super::{token::token_type::TokenType, Lox};
+use super::token::token_type::TokenType;
 use std::result::Result;
 
 pub struct Scanner {
@@ -52,10 +52,43 @@ impl Scanner {
             '*' => self.add_token_type(TokenType::STAR),
             '-' => self.add_token_type(TokenType::MINUS),
             ';' => self.add_token_type(TokenType::SEMICOLON),
+            '>' => match self.match_next_char('=') {
+                true => self.add_token_type(TokenType::GREATER_EQUAL),
+                false => self.add_token_type(TokenType::GREATER),
+            },
+            '<' => match self.match_next_char('=') {
+                true => self.add_token_type(TokenType::LESS_EQUAL),
+                false => self.add_token_type(TokenType::LESS),
+            },
+            '!' => match self.match_next_char('=') {
+                true => self.add_token_type(TokenType::BANG_EQUAL),
+                false => self.add_token_type(TokenType::BANG),
+            },
+            '=' => match self.match_next_char('=') {
+                true => self.add_token_type(TokenType::EQUAL_EQUAL),
+                false => self.add_token_type(TokenType::EQUAL),
+            },
             '\n' => println!("Got a newline"),
-            c => return Err((self.line, String::from("Character is not recognized"))),
+            c => return Err((self.line, format!("Character {c} is not recognized"))),
         }
         Ok(())
+    }
+
+    pub fn match_next_char(&mut self, c: char) -> bool {
+        if self.is_at_end() {
+            return false;
+        }
+        let c_src = self
+            .source
+            .chars()
+            .nth(self.current)
+            .expect("This character must be present at this index");
+        if c != c_src {
+            return false;
+        }
+
+        self.current += 1;
+        true
     }
 
     pub fn add_token_type(&mut self, typ: TokenType) {

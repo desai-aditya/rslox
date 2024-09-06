@@ -28,8 +28,7 @@ impl<'src> Scanner<'src> {
             self.start = self.current;
             self.scan_token()?;
         }
-        self.tokens
-            .push(Token::new(TokenType::EOF, "", '\0', self.line));
+        self.tokens.push(Token::new(TokenType::EOF, "", self.line));
         Ok(self.tokens.clone())
     }
 
@@ -78,8 +77,28 @@ impl<'src> Scanner<'src> {
             },
             '\r' | ' ' | '\t' => (),
             '\n' => self.line += 1,
+            '"' => self.scan_string()?,
             c => return Err((self.line, format!("Character {c} is not recognized"))),
         }
+        Ok(())
+    }
+
+    pub fn scan_string(&mut self) -> Result<(), (usize, String)> {
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advance();
+        }
+        if self.is_at_end() {
+            return Err((self.line, format!("Incomplete string literal")));
+        }
+
+        assert!(self.peek() == '"');
+        self.advance();
+
+        let str = String::from(&self.source[self.start + 1..self.current - 1]);
+        self.add_token_type(TokenType::STRING(str));
         Ok(())
     }
 
@@ -111,13 +130,8 @@ impl<'src> Scanner<'src> {
     }
 
     pub fn add_token_type(&mut self, typ: TokenType) {
-        self.add_token_literal(typ, '\0');
-    }
-
-    pub fn add_token_literal(&mut self, typ: TokenType, literal: char) {
         let substr = &self.source[self.start..self.current];
-        self.tokens
-            .push(Token::new(typ, substr, literal, self.line));
+        self.tokens.push(Token::new(typ, substr, self.line));
     }
 
     pub fn is_at_end(&self) -> bool {

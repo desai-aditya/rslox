@@ -28,9 +28,9 @@ pub enum TokenType {
     LESS_EQUAL,
 
     // literals
-    IDENTIFIER,
-    STRING,
-    NUMBER,
+    IDENTIFIER(String),
+    STRING(String),
+    NUMBER(f64),
 
     // keywords
     AND,
@@ -77,9 +77,9 @@ impl Display for TokenType {
             Self::LESS => write!(f, "LESS"),
             Self::LESS_EQUAL => write!(f, "LESS_EQUAL"),
 
-            Self::IDENTIFIER => write!(f, "IDENTIFIER"),
-            Self::STRING => write!(f, "STRING"),
-            Self::NUMBER => write!(f, "NUMBER"),
+            Self::IDENTIFIER(string) => write!(f, "IDENTIFIER({:})", string),
+            Self::STRING(string) => write!(f, "STRING({:})", string),
+            Self::NUMBER(num) => write!(f, "NUMBER({:})", num),
             Self::AND => write!(f, "AND"),
             Self::CLASS => write!(f, "CLASS"),
             Self::ELSE => write!(f, "ELSE"),

@@ -78,11 +78,38 @@ impl<'src> Scanner<'src> {
             '\r' | ' ' | '\t' => (),
             '\n' => self.line += 1,
             '"' => self.scan_string()?,
+            '0'..'9' => self.scan_number()?,
             c => return Err((self.line, format!("Character {c} is not recognized"))),
         }
         Ok(())
     }
 
+    pub fn scan_number(&mut self) -> Result<(), (usize, String)> {
+        loop {
+            match self.peek() {
+                '0'..'9' => self.advance(),
+                _ => break,
+            };
+        }
+        match self.peek() {
+            '.' => {
+                self.advance();
+                loop {
+                    match self.peek() {
+                        '0'..'9' => self.advance(),
+                        _ => break,
+                    };
+                }
+            }
+            _ => (),
+        }
+        let num: f64 = (&self.source[self.start..self.current])
+            .parse()
+            .expect("Number could not be parsed");
+
+        self.add_token_type(TokenType::NUMBER(num));
+        Ok(())
+    }
     pub fn scan_string(&mut self) -> Result<(), (usize, String)> {
         while self.peek() != '"' && !self.is_at_end() {
             if self.peek() == '\n' {

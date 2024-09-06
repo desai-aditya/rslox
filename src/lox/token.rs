@@ -3,15 +3,15 @@ pub mod token_type;
 use token_type::TokenType;
 
 #[derive(Clone, Debug)]
-pub struct Token {
+pub struct Token<'src> {
     typ: TokenType,
-    lexeme: String,
+    lexeme: &'src str,
     literal: char,
     line: usize,
 }
 
-impl Token {
-    pub fn new(typ: token_type::TokenType, lexeme: String, literal: char, line: usize) -> Self {
+impl<'src> Token<'src> {
+    pub fn new(typ: token_type::TokenType, lexeme: &'src str, literal: char, line: usize) -> Self {
         Self {
             typ,
             lexeme,
@@ -21,7 +21,7 @@ impl Token {
     }
 }
 
-impl ToString for Token {
+impl ToString for Token<'_> {
     fn to_string(&self) -> String {
         format!("{} {} {}", self.typ, self.lexeme, self.literal)
     }

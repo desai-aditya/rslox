@@ -26,7 +26,7 @@ impl Lox {
     }
 
     pub fn run(&mut self, source: String) -> io::Result<()> {
-        let mut scan = Scanner::new(source);
+        let mut scan = Scanner::new(&source);
         match scan.scan_tokens() {
             Ok(token_vec) => println!("{:?}", token_vec),
             Err((line, e)) => self.error(line, e),

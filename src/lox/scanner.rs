@@ -4,16 +4,16 @@ use std::vec::Vec;
 use super::token::token_type::TokenType;
 use std::result::Result;
 
-pub struct Scanner {
-    source: String,
-    tokens: Vec<Token>,
+pub struct Scanner<'src> {
+    source: &'src str,
+    tokens: Vec<Token<'src>>,
     line: usize,
     current: usize,
     start: usize,
 }
 
-impl Scanner {
-    pub fn new(source: String) -> Self {
+impl<'src> Scanner<'src> {
+    pub fn new(source: &'src str) -> Self {
         Self {
             source,
             tokens: Vec::<Token>::new(),
@@ -29,7 +29,7 @@ impl Scanner {
             self.scan_token()?;
         }
         self.tokens
-            .push(Token::new(TokenType::EOF, "".to_string(), '\0', self.line));
+            .push(Token::new(TokenType::EOF, "", '\0', self.line));
         Ok(self.tokens.clone())
     }
 
@@ -115,7 +115,7 @@ impl Scanner {
     }
 
     pub fn add_token_literal(&mut self, typ: TokenType, literal: char) {
-        let substr = self.source[self.start..self.current].to_string();
+        let substr = &self.source[self.start..self.current];
         self.tokens
             .push(Token::new(typ, substr, literal, self.line));
     }

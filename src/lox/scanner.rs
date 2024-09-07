@@ -1,8 +1,10 @@
 use crate::lox::token::Token;
+use lazy_static::lazy_static;
+use std::collections::HashMap;
+use std::result::Result;
 use std::vec::Vec;
 
 use super::token::token_type::TokenType;
-use std::result::Result;
 
 pub struct Scanner<'src> {
     source: &'src str,
@@ -10,6 +12,29 @@ pub struct Scanner<'src> {
     line: usize,
     current: usize,
     start: usize,
+}
+
+lazy_static! {
+    static ref RESERVED_KEYWORDS_MAP: HashMap<&'static str, TokenType> = {
+        let mut m = HashMap::new();
+        m.insert("and", TokenType::AND);
+        m.insert("class", TokenType::CLASS);
+        m.insert("else", TokenType::ELSE);
+        m.insert("false", TokenType::FALSE);
+        m.insert("fun", TokenType::FUN);
+        m.insert("for", TokenType::FOR);
+        m.insert("if", TokenType::IF);
+        m.insert("nil", TokenType::NIL);
+        m.insert("or", TokenType::OR);
+        m.insert("print", TokenType::PRINT);
+        m.insert("return", TokenType::RETURN);
+        m.insert("super", TokenType::SUPER);
+        m.insert("this", TokenType::THIS);
+        m.insert("true", TokenType::TRUE);
+        m.insert("var", TokenType::VAR);
+        m.insert("while", TokenType::WHILE);
+        m
+    };
 }
 
 impl<'src> Scanner<'src> {
@@ -78,9 +103,28 @@ impl<'src> Scanner<'src> {
             '\r' | ' ' | '\t' => (),
             '\n' => self.line += 1,
             '"' => self.scan_string()?,
-            '0'..'9' => self.scan_number()?,
+            '0'..='9' => self.scan_number()?,
+            'a'..='z' | 'A'..='Z' => self.scan_identifier_or_reserved()?,
             c => return Err((self.line, format!("Character {c} is not recognized"))),
         }
+        Ok(())
+    }
+
+    pub fn scan_identifier_or_reserved(&mut self) -> Result<(), (usize, String)> {
+        loop {
+            match self.peek() {
+                'a'..='z' | 'A'..='Z' | '_' | '0'..='9' => self.advance(),
+                _ => break,
+            };
+        }
+
+        let identifier = String::from(&self.source[self.start..self.current]);
+
+        match RESERVED_KEYWORDS_MAP.get(&identifier as &str) {
+            Some(t) => self.add_token_type(t.clone()),
+            None => self.add_token_type(TokenType::IDENTIFIER(identifier)),
+        };
+
         Ok(())
     }
 
